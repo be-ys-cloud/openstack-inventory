@@ -1,5 +1,3 @@
-![](logo.png)
-
 # openstack-inventory
 openstack-inventory is a scripting tool for Ansible, who enables to create dynamic inventories from OpenStack API. Groups, environments and "logical" projects could be defined through metadatas. It also supports the principle of bastion. 
 
@@ -55,5 +53,14 @@ In order to use this program on your computer, you must :
 5. In your Ansible files (notably in `playbook.yml`), replace all `{{inventory_dir}}` by : `inventories/{{lookup('env', 'PROJECT_ENV')}}`). This step is not mandatory if you have a second inventory file which is fixed in the `ansible-playbook` command.
 6. You can deploy !
 
-## License
+## Acknowledgment
+We like to thanks [Florian Forestier](https://github.com/Artheriom), WDU (aka *"Maître Python"*) and ODA for their work on this tool.
+
+## Legal notice
 This program is distributed under [GNU GPL License](https://www.gnu.org/licenses/gpl-3.0.html). 
+
+OpenStack® is a trademark of the OpenStack Foundation. All rights reserved.
+
+Ansible is a trademark of RedHat. All rights reserved.
+
+Other trademarks, names and logos are the property of their respective authors.
