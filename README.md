@@ -54,7 +54,7 @@ In order to use this program on your computer, you must :
 6. You can deploy !
 
 ## Acknowledgment
-We like to thanks [Florian Forestier](https://github.com/Artheriom), WDU (aka *"Maître Python"*) and ODA for their work on this tool.
+We like to thanks [Florian Forestier](https://github.com/Artheriom), [RezoApio](https://github.com/RezoApio) and ODA for their work on this tool.
 
 ## Legal notice
 This program is distributed under [GNU GPL License](https://www.gnu.org/licenses/gpl-3.0.html). 
