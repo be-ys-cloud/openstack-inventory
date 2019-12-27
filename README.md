@@ -50,7 +50,7 @@ In order to use this program on your computer, you must :
 2. You also have to define `PROJECT_NAME` and `PROJECT_ENV` with your desired informations.
 3. Define the `SSH_KEY` variable with the path of your SSH key. It will be used to generate properly the bastion connexion. (If you are not using bastion, you can skip this step)
 4. Edit the `ansible-playbook` to tell Ansible to use the program : `ansible-playbook -i ./CLONED_DIR/main.py [...]`.
-5. In your Ansible files (notably in `playbook.yml`), replace all `{{inventory_dir}}` by : `inventories/{{lookup('env', 'PROJECT_ENV')}}`). This step is not mandatory if you have a second inventory file which is fixed in the `ansible-playbook` command.
+5. In your Ansible files (notably in `playbook.yml`), replace all `{{inventory_dir}}` by : `inventories/{{lookup('env', 'PROJECT_ENV')}}`). 
 6. You can deploy !
 
 ## Acknowledgment
