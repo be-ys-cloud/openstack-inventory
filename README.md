@@ -5,6 +5,7 @@ openstack-inventory is a scripting tool for Ansible, who enables to create dynam
 This program is enable to :
 * Retrieve instance list from an OpenStack project, and filter them with `ansible_group`, `environment`, and `project`.
 * Dynamically generate a corresponding Ansible inventory, with the associated IP address.
+* Include all metadatas of OpenStack's instance into the _meta Ansible section, so you are able to use custom variables during deployment
 * Managing the principle of bastion (with SSH Proxy).
 
 ## Prerequisites 
@@ -50,8 +51,11 @@ In order to use this program on your computer, you must :
 2. You also have to define `PROJECT_NAME` and `PROJECT_ENV` with your desired informations.
 3. Define the `SSH_KEY` variable with the path of your SSH key. It will be used to generate properly the bastion connexion. (If you are not using bastion, you can skip this step)
 4. Edit the `ansible-playbook` to tell Ansible to use the program : `ansible-playbook -i ./CLONED_DIR/main.py [...]`.
-5. In your Ansible files (notably in `playbook.yml`), replace all `{{inventory_dir}}` by : `inventories/{{lookup('env', 'PROJECT_ENV')}}`). This step is not mandatory if you have a second inventory file which is fixed in the `ansible-playbook` command.
+5. In your Ansible files (notably in `playbook.yml`), replace all `{{inventory_dir}}` by : `inventories/{{lookup('env', 'PROJECT_ENV')}}`).
 6. You can deploy !
+
+## Go Further
+* In the same spirit of `ansible_group`, you can set multiple `ansible_project` to an instance, by using comma. You can also ask the tool to deploy on several logical projects, using comma in the environment variables (for example : `export PROJECT_NAME="projectA,projectB"`). **BUT**, we are **strongly discouraging this option**, because of the potential consequences of this usage. If there are an `api` group on both `projectA` and `projectB`, you will deploy on all the instances, without differentiation. It could be useful for some things (eg. monitoring tools), but, please, be very careful.
 
 ## Acknowledgment
 We like to thanks [Florian Forestier](https://github.com/Artheriom), [RezoApio](https://github.com/RezoApio) and ODA for their work on this tool.
