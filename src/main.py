@@ -46,11 +46,14 @@ compute_api = ""
 project_env = args.env if args.env != "" else os.getenv("PROJECT_ENV")
 project_name = args.name if args.name != "" else os.getenv("PROJECT_NAME")
 
-project_name = project_name.split(",")
+# Check if the mandatory variables are available
+MANDATORY_ENV_VARS=["OS_USERNAME", "OS_PASSWORD", "OS_USER_DOMAIN_NAME", "OS_PROJECT_ID", "OS_AUTH_URL", "OS_REGION_NAME", "PROJECT_ENV", "PROJECT_NAME"]
+for var in MANDATORY_ENV_VARS:
+    if var not in os.environ:
+        raise EnvironmentError("Failed because {} is not set.".format(var))
 
-if len(project_name) > 1:
-    print("[WARNING] You defined more than one project name ! You are using this function at your own risk.")
-    print("[WARNING] For more information, please visit https://github.com/be-ys/openstack-inventory")
+project_env = project_env.split(",")
+project_name = project_name.split(",")
 
 # Login
 headers = {'Content-Type': 'application/json'}
@@ -103,7 +106,7 @@ def parse():
 
     for srv in instance_file["servers"]:
         if srv["metadata"] and "environment" in srv["metadata"]:
-            if srv["metadata"]["environment"] == project_env and srv["metadata"]["project"] in project_name:
+            if srv["metadata"]["environment"] in project_env and srv["metadata"]["project"] in project_name:
                 # Getting IP for this instance
                 ip_to_add = find_ip("fixed", srv["addresses"])
                 if ip_to_add != "":
