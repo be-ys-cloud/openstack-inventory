@@ -56,9 +56,11 @@ In order to use this program on your computer, you must :
 
 ## Go Further
 * In the same spirit of `ansible_group`, you can set multiple `ansible_project` to an instance, by using comma. You can also ask the tool to deploy on several logical projects, using comma in the environment variables (for example : `export PROJECT_NAME="projectA,projectB"`). **BUT**, we are **strongly discouraging this option**, because of the potential consequences of this usage. If there are an `api` group on both `projectA` and `projectB`, you will deploy on all the instances, without differentiation. It could be useful for some things (eg. monitoring tools), but, please, be very careful.
+* You can also do this with the `PROJECT_ENV`.
+* At the beginning, the tool were only designed to go through a bastion, and local IP. We recently added a way to use floating ips, e.g if your infrastructure does not have bastion, or if you need to connect directly to your instances. To enable it, you can use `--fip` argument, or set the `USE_FLOATING_IP` environment variable. In this case, the content of the variable is not checked: If variable is here, it will use FIP.  
 
 ## Acknowledgment
-We like to thanks [Florian Forestier](https://github.com/Artheriom), [RezoApio](https://github.com/RezoApio) and ODA for their work on this tool.
+We like to thanks [Florian Forestier](https://github.com/Artheriom), [RezoApio](https://github.com/RezoApio), [Jérôme Revillard](https://github.com/jrevillard) and ODA for their work on this tool.
 
 ## Legal notice
 This program is distributed under [GNU GPL License](https://www.gnu.org/licenses/gpl-3.0.html). 
