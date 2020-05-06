@@ -26,6 +26,7 @@ from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument("-e", "--env", help="Define the project environment.", default="")
 parser.add_argument("-n", "--name", help="Define the project name.", default="")
+parser.add_argument("-f", "--fip", help="Tell the script to direcly connect through Public IP (Be careful with this!)", default=False, action='store_true')
 args, unknown = parser.parse_known_args()
 
 # Variables from Environment.
@@ -37,20 +38,31 @@ project_id = os.getenv("OS_PROJECT_ID")
 auth_api = os.getenv("OS_AUTH_URL")
 region_name = os.getenv("OS_REGION_NAME")
 # Custom variables for this script
-project_env = os.getenv("PROJECT_ENV"),
-project_name = os.getenv("PROJECT_NAME")
 plainssh_location = os.getenv("SSH_KEY")
 
 compute_api = ""
+
+use_fip_only = args.fip
+if not(use_fip_only):
+    #Check if defined in path
+    use_fip_only = "USE_FLOATING_IP" in os.environ
 
 project_env = args.env if args.env != "" else os.getenv("PROJECT_ENV")
 project_name = args.name if args.name != "" else os.getenv("PROJECT_NAME")
 
 # Check if the mandatory variables are available
-MANDATORY_ENV_VARS=["OS_USERNAME", "OS_PASSWORD", "OS_USER_DOMAIN_NAME", "OS_PROJECT_ID", "OS_AUTH_URL", "OS_REGION_NAME", "PROJECT_ENV", "PROJECT_NAME"]
+MANDATORY_ENV_VARS=["OS_USERNAME", "OS_PASSWORD", "OS_USER_DOMAIN_NAME", "OS_PROJECT_ID", "OS_AUTH_URL", "OS_REGION_NAME"]
+MISSING_ENV_VARS=[]
 for var in MANDATORY_ENV_VARS:
     if var not in os.environ:
-        raise EnvironmentError("Failed because {} is not set.".format(var))
+        MISSING_ENV_VARS.append(var)
+if MISSING_ENV_VARS:
+    raise EnvironmentError("Failed because {} is not set.".format(MISSING_ENV_VARS))
+
+if project_env == None:
+    raise EnvironmentError("Failed because project environment is not set.")
+if project_name == None:
+    raise EnvironmentError("Failed because project name is not set.")
 
 project_env = project_env.split(",")
 project_name = project_name.split(",")
@@ -66,11 +78,11 @@ headers = {'X-Auth-Token': login_request.headers.get("X-Subject-Token")}
 
 # Retrieving Compute API URL.
 login_result = json.loads(login_request.content)
-for cata in login_result["token"]["catalog"]:
-    if cata["type"] == "compute" and cata["name"] == "nova":
-        for endp in cata["endpoints"]:
-            if endp["region"] == region_name and endp["interface"] == "public":
-                compute_api = endp["url"]
+for catalog in login_result["token"]["catalog"]:
+    if catalog["type"] == "compute" and catalog["name"] == "nova":
+        for endpoint in catalog["endpoints"]:
+            if endpoint["region"] == region_name and endpoint["interface"] == "public":
+                compute_api = endpoint["url"]
 
 if compute_api == "":
     print("[FATAL] Compute API not found in auth endpoints. Aborting.")
@@ -96,19 +108,20 @@ def find_ip(addr_type, addresses):
 
 def parse():
     bastion = ""
-    for srv in instance_file["servers"]:
-        if srv["metadata"] and "ansible_group" in srv["metadata"]:
-            # Iterating each server, creating inventory from data we received and getting Bastion's IP.
-            if srv["metadata"]["ansible_group"] == "bastion" and plainssh_location is not None:
-                user = srv["metadata"]["user"] if "user" in srv["metadata"] else "centos"
-                bastion = "-o ProxyCommand='ssh -o StrictHostKeyChecking=no -i " + plainssh_location + " -W %h:%p -q " + user + "@" + find_ip(
-                    "floating", srv["addresses"]) + "' -i " + plainssh_location
+    if not(use_fip_only):
+        for srv in instance_file["servers"]:
+            if srv["metadata"] and "ansible_group" in srv["metadata"]:
+                # Iterating each server, creating inventory from data we received and getting Bastion's IP.
+                if srv["metadata"]["ansible_group"] == "bastion" and plainssh_location is not None:
+                    user = srv["metadata"]["user"] if "user" in srv["metadata"] else "centos"
+                    bastion = "-o ProxyCommand='ssh -o StrictHostKeyChecking=no -i " + plainssh_location + " -W %h:%p -q " + user + "@" + find_ip(
+                        "floating", srv["addresses"]) + "' -i " + plainssh_location
 
     for srv in instance_file["servers"]:
         if srv["metadata"] and "environment" in srv["metadata"]:
             if srv["metadata"]["environment"] in project_env and srv["metadata"]["project"] in project_name:
                 # Getting IP for this instance
-                ip_to_add = find_ip("fixed", srv["addresses"])
+                ip_to_add = find_ip("floating", srv["addresses"]) if use_fip_only else find_ip("fixed", srv["addresses"])
                 if ip_to_add != "":
                     meta[ip_to_add] = srv["metadata"]
                     meta[ip_to_add]["hostname"] = srv["name"]
