@@ -134,9 +134,8 @@ def parse():
                             inventory[group]["hosts"] = [ip_to_add]
 
     # Ajout des groupes persistents dans l'inventaire.
-    inventory["localhost"] = {"hosts": ["localhost"], "vars": {"ansible_connection": "local"}}
     inventory["servers"] = {"children": group_list, "vars": {"ansible_ssh_common_args": bastion}}
-    inventory["all"] = {"children": ["localhost", "servers", "ungrouped"]}
+    inventory["all"] = {"children": ["servers", "ungrouped"]}
     inventory["_meta"] = {"hostvars": meta}
     return inventory
 
