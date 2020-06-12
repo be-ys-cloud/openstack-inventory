@@ -119,7 +119,7 @@ def parse():
 
     for srv in instance_file["servers"]:
         if srv["metadata"] and "environment" in srv["metadata"]:
-            if srv["metadata"]["environment"] in project_env and srv["metadata"]["project"] in project_name:
+            if ( "*" in project_env or srv["metadata"]["environment"] in project_env ) and ( "*" in project_name or srv["metadata"]["project"] in project_name ):
                 # Getting IP for this instance
                 ip_to_add = find_ip("floating", srv["addresses"]) if use_fip_only else find_ip("fixed", srv["addresses"])
                 if ip_to_add != "":
